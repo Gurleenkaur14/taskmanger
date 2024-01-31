@@ -1,20 +1,26 @@
-# Use an official Node.js runtime as a parent image
-FROM node:16
+# Build Stage
+FROM node:alpine as builder
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy only package.json and package-lock.json first to leverage Docker caching
 COPY package*.json ./
 
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code to the working directory
+# Copy the rest of the application code
 COPY . .
 
-# Expose port 3000 to the outside world
-EXPOSE 3000
+# Build the React app
+RUN npm run build
 
-# Define the command to run your application
-CMD ["npm", "start"]
+# Production Stage
+FROM nginx:alpine
+
+# Copy the built static files from the build stage to the Nginx default public directory
+COPY --from=builder /app/build/ /usr/share/nginx/html
+
+# Expose port 80
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
