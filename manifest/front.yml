@@ -31,5 +31,5 @@ spec:
             - containerPort: 3000
           env:
             - name: REACT_APP_BACKEND_URL
-              value: "http://4.157.238.176"
+              value: "http://backend-service"
 
