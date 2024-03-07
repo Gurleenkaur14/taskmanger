@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -8,18 +9,21 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB
-mongoose.connect("mongodb+srv://mayankthukral1810:Project123@cluster0.zyjeuqn.mongodb.net/?retryWrites=true&w=majority")
+// Connect to Azure Cosmos DB for MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => {
-    console.log('Connected to MongoDB');
+    console.log('Connected to Azure Cosmos DB');
   })
   .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('Error connecting to Azure Cosmos DB:', error);
   });
 
 // Custom route handler for the root path
 app.get('/', (req, res) => {
-  res.send('Hello from backend!');
+  res.send('BACKEND!');
 });
 
 // Define Task Schema and Model using mongoose

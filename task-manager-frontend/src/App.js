@@ -11,7 +11,7 @@ function App() {
 
   useEffect(() => {
     // Fetch tasks from the backend when the component mounts
-    axios.get('http://localhost:5000/tasks')
+    axios.get(`${process.env.REACT_APP_BACKEND_URL}/tasks`)
       .then(response => setTasks(response.data))
       .catch(error => console.error('Error fetching tasks:', error));
   }, []); // Empty dependency array ensures the effect runs only once
@@ -22,13 +22,33 @@ function App() {
   };
 
   const handleAddTask = () => {
-    axios.post('http://localhost:5000/tasks', newTask)
+    // Check if both title and description are empty
+    if (!newTask.title.trim() && !newTask.description.trim()) {
+      alert('Add both Task title and Task description.');
+      return;
+    }
+  
+    // Check if title is empty
+    if (!newTask.title.trim()) {
+      alert('Task Title is empty. Please add a title of task.');
+      return;
+    }
+  
+    // Check if description is empty
+    if (!newTask.description.trim()) {
+      alert('Task Description is empty. Please add a description of task.');
+      return;
+    }
+  
+    axios.post(`${process.env.REACT_APP_BACKEND_URL}/tasks`, newTask)
       .then(response => {
         setTasks(prevTasks => [...prevTasks, response.data]);
         setNewTask({ title: '', description: '' });
       })
       .catch(error => console.error('Error adding task:', error));
   };
+  
+  
 
   const handleEditClick = (task) => {
     setEditingTask(task);
@@ -37,7 +57,7 @@ function App() {
   };
 
   const handleSaveEdit = (task) => {
-    axios.put(`http://localhost:5000/tasks/${task._id}`, {
+    axios.put(`${process.env.REACT_APP_BACKEND_URL}/tasks/${task._id}`, {
       title: editedTitle,
       description: editedDescription,
     })
@@ -53,7 +73,7 @@ function App() {
   };
 
   const handleDeleteTask = (taskId) => {
-    axios.delete(`http://localhost:5000/tasks/${taskId}`)
+    axios.delete(`${process.env.REACT_APP_BACKEND_URL}/tasks/${taskId}`)
       .then(response => {
         setTasks(prevTasks => prevTasks.filter(task => task._id !== taskId));
       })
@@ -62,76 +82,82 @@ function App() {
 
   console.log('Hello from frontend!');
   
+
+
   return (
-    <div className="app-container">
-      <h1>Task Manager</h1>
-      <ul className="task-list">
-        {tasks.map(task => (
-          <li key={task._id} className="task-item">
-            <div>
-              {editingTask && editingTask._id === task._id ? (
-                <>
-                  <input
-                    type="text"
-                    name="editedTitle"
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value)}
-                    placeholder="Edited Task title"
-                    className="input-field"
-                  />
-                  <input
-                    type="text"
-                    name="editedDescription"
-                    value={editedDescription}
-                    onChange={(e) => setEditedDescription(e.target.value)}
-                    placeholder="Edited Task description"
-                    className="input-field"
-                  />
-                </>
-              ) : (
-                <>
-                  <strong>{task.title}</strong>
-                  <p>{task.description}</p>
-                </>
-              )}
-            </div>
-            <div className="task-buttons">
-              {editingTask && editingTask._id === task._id ? (
-                <button className="save-button" onClick={() => handleSaveEdit(task)}>
-                  Save
+    <div className="container">
+      <div className="app-container">
+        <h1>Task Manager</h1>
+        <div className="add-task-container">
+          <input
+            type="text"
+            name="title"
+            value={newTask.title}
+            onChange={handleInputChange}
+            placeholder="Task title"
+            className="input-field"
+          />
+          <input
+            type="text"
+            name="description"
+            value={newTask.description}
+            onChange={handleInputChange}
+            placeholder="Task description"
+            className="input-field"
+          />
+          <button onClick={handleAddTask} className="add-button">
+            Add Task
+          </button>
+        </div>
+      </div>
+      <div className="task-container">
+        <ul className="task-list">
+          {tasks.map(task => (
+            <li key={task._id} className="task-item">
+              <div>
+                {editingTask && editingTask._id === task._id ? (
+                  <>
+                    <input
+                      type="text"
+                      name="editedTitle"
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      placeholder="Edited Task title"
+                      className="input-field"
+                    />
+                    <input
+                      type="text"
+                      name="editedDescription"
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      placeholder="Edited Task description"
+                      className="input-field"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <strong>{task.title}</strong>
+                    <p>{task.description}</p>
+                  </>
+                )}
+              </div>
+              <div className="task-buttons">
+                {editingTask && editingTask._id === task._id ? (
+                  <button className="save-button" onClick={() => handleSaveEdit(task)}>
+                    Save
+                  </button>
+                ) : (
+                  <button className="edit-button" onClick={() => handleEditClick(task)}>
+                    Edit
+                  </button>
+                )}
+                <button className="delete-button" onClick={() => handleDeleteTask(task._id)}>
+                  Delete
                 </button>
-              ) : (
-                <button className="edit-button" onClick={() => handleEditClick(task)}>
-                  Edit
-                </button>
-              )}
-              <button className="delete-button" onClick={() => handleDeleteTask(task._id)}>
-                Delete
-              </button>
-            </div>
-          </li>
-        ))}
-      </ul>
-      <div className="add-task-container">
-        <input
-          type="text"
-          name="title"
-          value={newTask.title}
-          onChange={handleInputChange}
-          placeholder="Task title"
-          className="input-field"
-        />
-        <input
-          type="text"
-          name="description"
-          value={newTask.description}
-          onChange={handleInputChange}
-          placeholder="Task description"
-          className="input-field"
-        />
-        <button onClick={handleAddTask} className="add-button">
-          Add Task
-        </button>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );
