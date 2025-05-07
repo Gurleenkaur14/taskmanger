@@ -22,7 +22,7 @@ jobs:
 
       # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
-        run: docker login -u ${{ secrets.DOCKERHUB_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+        run: docker login -u -p ${{ secrets.DOCKERHUB_NAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
       # Step 3: Build and Push Frontend Docker Image
       - name: Build and push frontend Docker image
