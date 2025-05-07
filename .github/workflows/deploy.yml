@@ -19,7 +19,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository:Gurleenkaur14/taskmanger
-          token: ${{ secrets.REPOSITORY_A_TOKEN }}
 
       # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
