@@ -27,13 +27,13 @@ jobs:
       # Step 3: Build and Push Frontend Docker Image
       - name: Build and push frontend Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_NAME }}/todof:latest -f task-manager-frontend/Dockerfile taskmanager-frontend
+          docker build -t ${{ secrets.DOCKER_NAME }}/todof:latest -f task-manager-frontend/Dockerfile task-manager-frontend
           docker push ${{ secrets.DOCKER_NAME }}/todof:latest
 
       # Step 4: Build and Push Backend Docker Image
       - name: Build and push backend Docker image
         run: |
-          docker build -t ${{ secrets.DOCKER_NAME }}/todob:latest -f task-manager-backend/Dockerfile taskmanager-backend
+          docker build -t ${{ secrets.DOCKER_NAME }}/todob:latest -f task-manager-backend/Dockerfile task-manager-backend
           docker push ${{ secrets.DOCKER_NAME }}/todob:latest
     
       # Step 5: Setup Terraform
