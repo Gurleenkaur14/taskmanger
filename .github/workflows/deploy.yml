@@ -83,6 +83,12 @@ jobs:
         run: |
           # Fetch public IP from Terraform output
           vm_ip=$(terraform output -raw public_ip)
+          echo "VM IP: $vm_ip"
+
+          if [ -z "$vm_ip" ]; then
+            echo "ERROR: VM IP not available from Terraform output."
+            exit 1
+          pfi
 
           # Run Docker commands on VM (Ensure Docker is installed via `custom_data` in your main.tf)
           ssh -o StrictHostKeyChecking=no azureuser@$vm_ip << 'EOF'

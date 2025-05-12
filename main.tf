@@ -36,7 +36,7 @@ resource "azurerm_public_ip" "example" {
   name                = "pip-veer"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
-  allocation_method   = "Dynamic"
+  allocation_method   = "Static"
 }
 
 resource "azurerm_network_interface" "example" {
