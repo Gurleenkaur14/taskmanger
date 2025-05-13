@@ -68,34 +68,53 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve
 
+      - name: Get VM IP
+        id: get_ip
+        run: echo "VM_IP=$(terraform output -raw public_ip)" >> $GITHUB_ENV
+
+      - name: Save SSH key
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Install Docker on VM
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa azureuser@$VM_IP << 'EOF'
+            curl -fsSL https://get.docker.com -o get-docker.sh
+            sh get-docker.sh
+            sudo usermod -aG docker azureuser
+          EOF
+        env:
+          VM_IP: ${{ env.VM_IP }}
+
       # Step 11: Show Terraform Output (Public IP of VM)
-      - name: Terraform Output
-        run: terraform output
+      #- name: Terraform Output
+       # run: terraform output
 
       # Step 12: Log in to Azure (to enable container actions on VM)
-      - name: Log in to Azure
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+     # - name: Log in to Azure
+      #  uses: azure/login@v1
+       # with:
+        #  creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       # Step 13: SSH into VM and Run Docker Containers (without SSH keys, using `custom_data`)
-      - name: Deploy Docker Containers to VM
-        run: |
-          # Fetch public IP from Terraform output
-          vm_ip=$(terraform output -raw public_ip)
-          echo "VM IP: $vm_ip"
-
-          if [ -z "$vm_ip" ]; then
-            echo "ERROR: VM IP not available from Terraform output."
-            exit 1
-          fi
-
-          # Run Docker commands on VM (Ensure Docker is installed via `custom_data` in your main.tf)
-          ssh -o StrictHostKeyChecking=no azureuser@$vm_ip << 'EOF'
-            sudo docker login -u ${{ secrets.DOCKER_NAME }} -p ${{ secrets.DOCKERHUB_TOKEN}}
-            sudo docker pull ${{ secrets.DOCKER_NAME }}/todob:latest
-            sudo docker pull ${{ secrets.DOCKER_NAME }}/todof:latest
-            sudo docker run -d -p 5000:5000 ${{ secrets.DOCKER_NAME }}/todob:latest
-            sudo docker run -d -p 80:80 ${{ secrets.DOCKER_NAME }}/todof:latest
-          EOF
+      ##- name: Deploy Docker Containers to VM
+      ##  run: |
+      ##    # Fetch public IP from Terraform output
+      ##    vm_ip=$(terraform output -raw public_ip)
+      ##    echo "VM IP: $vm_ip"
+##
+ #     ##    if [ -z "$vm_ip" ]; then
+ #      #     echo "ERROR: VM IP not available from Terraform output."
+ #      #     exit 1
+ #      #   fi
+#
+       #   # Run Docker commands on VM (Ensure Docker is installed via `custom_data` in your main.tf)
+       #   ssh -o StrictHostKeyChecking=no azureuser@$vm_ip << 'EOF'
+       #     sudo docker login -u ${{ secrets.DOCKER_NAME }} -p ${{ secrets.DOCKERHUB_TOKEN}}
+       #     sudo docker pull ${{ secrets.DOCKER_NAME }}/todob:latest
+       #     sudo docker pull ${{ secrets.DOCKER_NAME }}/todof:latest
+       #     sudo docker run -d -p 5000:5000 ${{ secrets.DOCKER_NAME }}/todob:latest
+       #     sudo docker run -d -p 80:80 ${{ secrets.DOCKER_NAME }}/todof:latest
+       #   EOF
 
